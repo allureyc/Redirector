@@ -13,7 +13,7 @@ def get_files_to_zip():
 
 	zippable_files = []
 	for root, folders, files in os.walk('.'):
-		print root
+		print (root)
 		for f in files:
 			file = os.path.join(root,f)
 			if not any(re.search(p, file) for p in exclude):
@@ -35,15 +35,15 @@ def create_addon(files, browser):
 	zf = zipfile.ZipFile(output_file, 'w', zipfile.ZIP_STORED)
 	cert = 'extension-certificate.pem'
 
-	print ''
-	print '**** Creating addon for %s ****' % browser
+	print ('')
+	print ('**** Creating addon for %s ****' % browser)
 	
 	if browser == 'opera' and not os.path.exists(cert):
-		print 'Extension certificate does not exist, cannot create .nex file for Opera'
+		print ('Extension certificate does not exist, cannot create .nex file for Opera')
 		return
 
 	for f in files:
-		print 'Adding', f
+		print ('Adding', f)
 		if f.endswith('manifest.json'):
 			manifest = json.load(open(f))
 			if browser != 'firefox':
@@ -76,8 +76,8 @@ if __name__ == '__main__':
 
 	files = get_files_to_zip()
 	
-	print '******* REDIRECTOR BUILD SCRIPT *******'
-	print ''
+	print ('******* REDIRECTOR BUILD SCRIPT *******')
+	print ('')
 
 	create_addon(files, 'chrome')
 	create_addon(files, 'edge')
