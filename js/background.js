@@ -56,9 +56,10 @@ function checkRedirects(details) {
 
 	//We only allow GET request to be redirected, don't want to accidentally redirect
 	//sensitive POST parameters
-	if (details.method != 'GET') {
-		return {};
-	}
+	// if (details.method != 'GET') {
+	// 	return {};
+	// }
+	log('***********************************************')
 	log('Checking: ' + details.type + ': ' + details.url);
 
 	var list = partitionedRedirects[details.type];
