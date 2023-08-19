@@ -1,0 +1,91 @@
+# This workflow will install Python dependencies, run tests and lint with a single version of Python
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-python
+
+name: Build and Release Plugin
+
+on:
+  push:
+    branches: [ "allureyc" ]
+    
+permissions:
+  contents: write
+  packages: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Get commit history
+      run: |
+        echo "BRANCH=$(git rev-parse --abbrev-ref HEAD)" >> $GITHUB_ENV
+        echo "COMMITS=$(git log -10 --pretty=format:"%h %s")" >> $GITHUB_ENV
+
+    - name: Set plugin env
+      run: |
+        echo "PluginName=Redirector-V3.0.${{ github.run_number }}" >> $GITHUB_ENV
+        echo "ReleaseName=Redirector-V3.0.${{ github.run_number }}" >> $GITHUB_ENV
+        echo "TagName=Redirector-V3.0.${{ github.run_number }}-${{ env.BRANCH }}" >> $GITHUB_ENV
+      
+    - name: Set up python 3.10
+      uses: actions/setup-python@v3
+      with:
+        python-version: "3.10"
+        
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install flake8 pytest
+        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
+    - name: Install gitHub cli
+      run: |
+        curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg
+        echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null
+        sudo apt update
+        sudo apt install gh
+        
+    - name: Lint with flake8
+      run: |
+        # stop the build if there are Python syntax errors or undefined names
+        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+        # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
+        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+        
+    - name: Build plugin
+      run: |
+        python build.py
+        echo *************build*************
+        ls build
+
+    - name: Create release
+      id: create_release
+      uses: actions/create-release@v1.1.4
+      env:
+        GITHUB_TOKEN: ${{ secrets.ACTIONS_TOKEN }}
+      with:
+        tag_name: ${{ env.TagName }}
+        release_name: ${{ env.ReleaseName }}
+        body: |
+          These are the changes since the last release:
+          
+          ${{ env.COMMITS }}
+          draft: false
+          prerelease: false
+      
+    - name: Check folders
+      run: |
+        ls -al ${{ github.workspace }}
+        echo Artifact path: ${{ steps.upload-plugin.outputs.artifact_path }}
+
+    - name: Upload assets
+      env: 
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        zip_files=$(find build/ -name "*.zip")
+        for file in $zip_files
+        do
+         gh release upload ${{ env.TagName }} $file -R allureyc/Redirector
+        done
