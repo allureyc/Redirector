@@ -18,7 +18,7 @@ Opera extension is no longer present (as of 2023/01/16)
 - Include pattern: `^(https?://)([a-z0-9-]*\.)m(?:obile)?\.(.*)`
 - Redirect to: `$1$2$3`
 - Pattern type: Regular Expression
-- Description: Always show the desktop site of a webpage
+- Description: Always show the desktop version of websites
 
 ### AMP redirect
 - Example URL: `https://www.google.com/amp/www.example.com/amp/document`
@@ -32,7 +32,7 @@ Opera extension is no longer present (as of 2023/01/16)
 - Include pattern: `^(?:https?://)ad.doubleclick.net/.*\?(http?s://.*)`
 - Redirect to: `$1`
 - Pattern type: Regular Expression
-- Description: Remove doubleclick link tracking / fix problems with doubleclick host based blocking
+- Description: Remove doubleclick link tracking / fix problems with doubleclick host-based blocking
 
 ### YouTube Shorts to YouTube
 - Example URL: `https://www.youtube.com/shorts/video-id`
@@ -75,6 +75,25 @@ What are bangs?: <https://duckduckgo.com/bangs>
 - Description: Create new !ghh bang that redirects to <https://githistory.xyz>
 - Advanced:
     - Process matches: URL decode
+    
+### Fast DuckDuckGo.com !bangs
+
+Go directly to frequently used DuckDuckGo bangs to avoid intermediary network requests.
+
+- Example URL: `https://duckduckgo.com/?q=foo+bar+%21google+test+bar`
+- Include pattern: `^https://duckduckgo\.com/\?q=(.*)\+(?:%21|!)google\b\+(.*?)(?:&|$)`
+- Redirect to: `https://google.com/search?hl=en&q=$1+$2`
+- Pattern type: Regular Expression
+- Description: DuckDuckGo → Google !bang shortcut (prefix AND suffix)
+- Pattern Description: Avoid extraneous + in URL with two separate patterns  
+###
+  
+- Example URL: `https://duckduckgo.com/?q=foo+bar+%21google`
+- Include pattern: `^https://duckduckgo\.com/\?q=(.*?)\+?(?:%21|!)google\b\+?(.*?)(?:&|$)`
+- Redirect to: `https://google.com/search?hl=en&q=$1$2`
+- Pattern type: Regular Expression
+- Description: DuckDuckGo → Google !bang shortcut (prefix OR suffix)
+- Pattern Description: Avoid extraneous + in URL with two separate patterns
 
 ## Dark Theme
 If you are a Firefox user and use a dark theme, you can add these lines to your `userChrome.css` file to make Redirector's extension button more visible:
